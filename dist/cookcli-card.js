@@ -183,7 +183,7 @@ class CookCliCard extends HTMLElement {
   }
 }
 
-class CookCliCardEditor extends LitElement {
+class CookCliCardEditor extends HTMLElement {
   setConfig(config) {
     this._config = config;
   }
