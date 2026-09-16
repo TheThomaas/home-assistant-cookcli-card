@@ -59,7 +59,7 @@ class CookCliCard extends HTMLElement {
       schema: [
         { name: "title", selector: { text: {} }, label: "Titre" },
         //{ name: "dashboard_path", selector: { text: {} }, label: "Chemin du dashboard", helper: "Laisser vide pour le dashboard courant" },
-        { name: "dashboard_path", selector: { ui_action: {} }, label: "Chemin du dashboard", helper: "Laisser vide pour le dashboard courant" },
+        { name: "dashboard_path", selector: { navigation: {} }, label: "Chemin du dashboard", helper: "Laisser vide pour le dashboard courant" },
         { name: "entry_id", selector: { text: {} }, label: "Entry ID", helper: "Optionnel — si plusieurs serveurs CookCLI" },
       ],
     };
