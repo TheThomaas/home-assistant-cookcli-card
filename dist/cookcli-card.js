@@ -50,8 +50,18 @@ class CookCliCard extends HTMLElement {
     this._render();
   }
 
-  static getConfigElement() {
-    return document.createElement("cookcli-card-editor");
+  /**
+  * Éditeur de configuration automatique intégré à Home Assistant.
+  * HA utilise ce schéma pour générer le formulaire visuel.
+  */
+  static getConfigForm() {
+    return {
+      schema: [
+        { name: "title", selector: { text: {} }, label: "Titre" },
+        { name: "dashboard_path", selector: { text: {} }, label: "Chemin du dashboard", helper: "Laisser vide pour le dashboard courant" },
+        { name: "entry_id", selector: { text: {} }, label: "Entry ID", helper: "Optionnel — si plusieurs serveurs CookCLI" },
+      ],
+    };
   }
 
   set hass(hass) {
@@ -184,75 +194,6 @@ class CookCliCard extends HTMLElement {
 }
 
 customElements.define("cookcli-card", CookCliCard);
-
-class CookCliCardEditor extends HTMLElement {
-  setConfig(config) {
-    this._config = config || {};
-  }
-
-  set hass(hass) {
-    this._hass = hass;
-    if (!this._dashboards) {
-      this._loadDashboards();
-    }
-  }
-
-  async _loadDashboards() {
-    try {
-      const result = await this._hass.callWS({ type: "lovelace/dashboards/list" });
-      // Filtrer pour ne garder que les dashboards avec un url_path
-      this._dashboards = result.filter((d) => d.url_path);
-      this._render();
-    } catch (e) {
-      console.error("Erreur dashboards/list", e);
-      this._dashboards = [];
-      this._render();
-    }
-  }
-
-  _render() {
-    if (!this._dashboards) {
-      this.innerHTML = `<div style="padding:16px">Chargement…</div>`;
-      return;
-    }
-
-    const options = this._dashboards
-      .map((d) => {
-        const path = `/${d.url_path}`;
-        const selected = this._config.dashboard_path === d.url_path ? "selected" : "";
-        return `<option value="${d.url_path}" ${selected}>${d.title || d.url_path}</option>`;
-      })
-      .join("");
-
-    this.innerHTML = `
-      <div style="padding: 16px;">
-        <label style="display:block; margin-bottom:8px; font-weight:500;">Dashboard</label>
-        <ha-select
-          naturalMenuWidth
-          fixedMenuPosition
-          value="${this._config.dashboard_path || ""}"
-          style="width:100%;"
-        >
-          <option value="">Dashboard courant</option>
-          ${options}
-        </ha-select>
-      </div>
-    `;
-
-    this.querySelector("ha-select")?.addEventListener("change", (ev) => {
-      const newConfig = { ...this._config, dashboard_path: ev.target.value };
-      this.dispatchEvent(
-        new CustomEvent("config-changed", {
-          bubbles: true,
-          composed: true,
-          detail: { config: newConfig },
-        })
-      );
-    });
-  }
-}
-
-customElements.define("cookcli-card-editor", CookCliCardEditor);
 
 window.customCards = window.customCards || [];
 window.customCards.push({
