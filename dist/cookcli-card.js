@@ -50,39 +50,19 @@ class CookCliCard extends HTMLElement {
     this._render();
   }
 
-    /**
-   * Éditeur de configuration automatique intégré à Home Assistant.
-   * HA utilise ce schéma pour générer le formulaire visuel.
-   */
-    static getConfigForm() {
-      return {
-        schema: [
-          {
-            name: "title",
-            selector: { text: {} },
-          },
-          {
-            name: "dashboard_path",
-            selector: { text: {} },
-            helper: "Laisser vide pour naviguer dans le dashboard courant",
-          },
-          {
-            name: "entry_id",
-            selector: { text: {} },
-            helper: "Optionnel — ID d'entrée si plusieurs serveurs CookCLI",
-          },
-        ],
-        // Fonction optionnelle pour personnaliser les libellés
-        computeLabel: (schema) => {
-          const labels = {
-            title: "Titre",
-            dashboard_path: "Chemin du dashboard",
-            entry_id: "Entry ID",
-          };
-          return labels[schema.name] || schema.name;
-        },
-      };
-    }
+  /**
+  * Éditeur de configuration automatique intégré à Home Assistant.
+  * HA utilise ce schéma pour générer le formulaire visuel.
+  */
+  static getConfigForm() {
+    return {
+      schema: [
+        { name: "title", selector: { text: {} }, label: "Titre" },
+        { name: "dashboard_path", selector: { text: {} }, label: "Chemin du dashboard", helper: "Laisser vide pour le dashboard courant" },
+        { name: "entry_id", selector: { text: {} }, label: "Entry ID", helper: "Optionnel — si plusieurs serveurs CookCLI" },
+      ],
+    };
+  }
 
   set hass(hass) {
     this._hass = hass;
