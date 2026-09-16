@@ -200,30 +200,6 @@ class CookCliCardEditor extends LitElement {
   static getConfigForm() {
     return {
       schema: [
-        { name: "label", selector: { label: {} } },
-        { name: "entity", required: true, selector: { entity: {} } },
-      ],
-      computeLabel: (schema) => {
-        return undefined;
-      },
-      computeHelper: (schema) => {
-        switch (schema.name) {
-          case "entity":
-            return "This text describes the function of the entity selector";
-        }
-        return undefined;
-      },
-      assertConfig: (config) => {
-        if (config.other_option) {
-          throw new Error("'other_option' is unexpected.");
-        }
-      },
-    };
-  }
-
-  /*static getConfigForm() {
-    return {
-      schema: [
         {
           name: "title",
           selector: { text: {} },
@@ -262,7 +238,7 @@ class CookCliCardEditor extends LitElement {
         }
       },
     };
-  }*/
+  }
 
 }
 
