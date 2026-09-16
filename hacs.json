@@ -1,5 +1,5 @@
 {
-  "name": "CookCLI Integration Card",
+  "name": "CookCLI Recipes Card",
   "render_readme": true,
   "filename": "cookcli-card.js"
 }
