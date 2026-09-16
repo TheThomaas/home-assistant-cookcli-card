@@ -33,10 +33,6 @@
  */
 
 class CookCliCard extends HTMLElement {
-  static getConfigElement() {
-    return document.createElement("cookcli-card-editor");
-  }
-
   static getStubConfig() {
     return { title: "Recettes" };
   }
