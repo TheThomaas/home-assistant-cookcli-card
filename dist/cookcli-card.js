@@ -33,10 +33,6 @@
  */
 
 class CookCliCard extends HTMLElement {
-  static getConfigElement() {
-    return document.createElement("cookcli-card-editor");
-  }
-
   static getStubConfig() {
     return { title: "Recettes" };
   }
@@ -183,67 +179,82 @@ class CookCliCard extends HTMLElement {
   }
 }
 
-class CookCliCardEditor extends LitElement {
+class CookCliCardEditor extends HTMLElement {
   setConfig(config) {
     this._config = config || {};
   }
 
-  configChanged(newConfig) {
-    const event = new Event("config-changed", {
+  set hass(hass) {
+    this._hass = hass;
+  }
+
+  // Définit le schéma du formulaire (une entrée par champ configurable)
+  get _schema() {
+    return [
+      {
+        name: "title",
+        selector: { text: {} },
+      },
+      {
+        name: "dashboard_path",
+        selector: { text: {} },
+        helper: "Laisser vide pour naviguer dans le dashboard courant",
+      },
+      {
+        name: "entry_id",
+        selector: { text: {} },
+        helper: "Optionnel — ID d'entrée si plusieurs serveurs CookCLI",
+      },
+    ];
+  }
+
+  // Fournit les libellés des champs
+  _computeLabel(schema) {
+    const labels = {
+      title: "Titre",
+      dashboard_path: "Chemin du dashboard",
+      entry_id: "Entry ID",
+    };
+    return labels[schema.name] || schema.name;
+  }
+
+  // Gère les changements dans le formulaire
+  _valueChanged(ev) {
+    if (!this._config || !this._hass) {
+      return;
+    }
+    const newConfig = { ...this._config, ...ev.detail.value };
+
+    this._config = newConfig;
+
+    const event = new CustomEvent("config-changed", {
+      detail: { config: newConfig },
       bubbles: true,
       composed: true,
     });
-    event.detail = { config: newConfig };
     this.dispatchEvent(event);
   }
 
-  static getConfigForm() {
-    return {
-      schema: [
-        {
-          name: "title",
-          selector: { text: {} },
-        },
-        {
-          name: "dashboard_path",
-          selector: { text: {} },
-          helper: "Laisser vide pour naviguer dans le dashboard courant",
-        },
-        {
-          name: "entry_id",
-          selector: { text: {} },
-          helper: "Optionnel — ID d'entrée si plusieurs serveurs CookCLI",
-        },
-      ],
-      computeLabel: (schema) => {
-        const labels = {
-          title: "Titre",
-          dashboard_path: "Chemin du dashboard",
-          entry_id: "Entry ID",
-        };
-        return labels[schema.name] || schema.name;
-      },
-      computeHelper: (schema) => {
-        switch (schema.name) {
-          case "entity":
-            return "This text describes the function of the entity selector";
-          case "unit":
-            return "The unit of measurement for this card";
-        }
-        return undefined;
-      },
-      assertConfig: (config) => {
-        if (config.other_option) {
-          throw new Error("'other_option' is unexpected.");
-        }
-      },
-    };
+  render() {
+    if (!this._hass) return;
+
+    this.innerHTML = `
+      <ha-form
+        .hass=${this._hass}
+        .data=${this._config}
+        .schema=${this._schema}
+        .computeLabel=${this._computeLabel.bind(this)}
+        @value-changed=${this._valueChanged.bind(this)}
+      ></ha-form>
+    `;
   }
 
+  connectedCallback() {
+    this.render();
+  }
 }
 
 customElements.define("cookcli-card", CookCliCard);
-customElements.define("cookcli-card-editor", CookCliCardEditor);
 
 window.customCards = window.customCards || [];
 window.customCards.push({
