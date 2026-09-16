@@ -33,6 +33,10 @@
  */
 
 class CookCliCard extends HTMLElement {
+  static getConfigElement() {
+    return document.createElement("cookcli-card-editor");
+  }
+
   static getStubConfig() {
     return { title: "Recettes" };
   }
@@ -255,6 +259,7 @@ class CookCliCardEditor extends HTMLElement {
 }
 
 customElements.define("cookcli-card", CookCliCard);
+customElements.define("cookcli-card-editor", CookCliCardEditor);
 
 window.customCards = window.customCards || [];
 window.customCards.push({
