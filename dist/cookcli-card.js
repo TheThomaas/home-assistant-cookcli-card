@@ -129,18 +129,18 @@ class CookCliCard extends HTMLElement {
       return `<div class="state-msg">Aucune recette trouvée.</div>`;
     }
 
-    const rows = this._recipes
+    const cards = this._recipes
       .map((r) => {
         const meta = [];
         if (r.time) meta.push(`<span>⏱ ${this._escape(r.time)}</span>`);
         if (r.servings) meta.push(`<span>🍽 ${this._escape(String(r.servings))}</span>`);
         const thumb = r.image_url
-          ? `<img class="recipe-thumb" src="${this._escape(r.image_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`
+          ? `<img class="recipe-thumb" src="${this._escape(r.image_url)}" alt="" loading="lazy" onerror="this.style.background='var(--divider-color)';this.removeAttribute('src')">`
           : `<div class="recipe-thumb recipe-thumb-placeholder"></div>`;
         return `
-          <div class="recipe-row" data-view-path="${this._escape(r.view_path)}">
+          <div class="recipe-card" data-view-path="${this._escape(r.view_path)}">
             ${thumb}
-            <div class="recipe-row-text">
+            <div class="recipe-card-text">
               <div class="recipe-name">${this._escape(r.name)}</div>
               <div class="recipe-meta">${meta.join("")}</div>
             </div>
@@ -148,7 +148,7 @@ class CookCliCard extends HTMLElement {
       })
       .join("");
 
-    return `<div class="recipe-list">${rows}</div>`;
+    return `<div class="recipe-grid">${cards}</div>`;
   }
 
   _render() {
@@ -167,27 +167,74 @@ class CookCliCard extends HTMLElement {
       .card-content { padding: 0 16px 16px; }
       .state-msg { padding: 16px 0; color: var(--secondary-text-color); }
       .state-msg.error { color: var(--error-color, #db4437); }
-      .recipe-list { display: flex; flex-direction: column; }
-      .recipe-row {
-        display: flex; align-items: center; gap: 12px;
-        padding: 10px 4px; border-bottom: 1px solid var(--divider-color);
+
+      /* Grille responsive : 1 colonne par défaut (mobile),
+         puis 2 / 3 / 4 colonnes selon la largeur disponible. */
+      .recipe-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      @media (min-width: 500px) {
+        .recipe-grid { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media (min-width: 800px) {
+        .recipe-grid { grid-template-columns: repeat(3, 1fr); }
+      }
+      @media (min-width: 1100px) {
+        .recipe-grid { grid-template-columns: repeat(4, 1fr); }
+      }
+
+      .recipe-card {
+        display: flex;
+        flex-direction: column;
+        background: var(--card-background-color);
+        border-radius: 12px;
+        overflow: hidden;
         cursor: pointer;
+        border: 1px solid var(--divider-color);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
       }
-      .recipe-row:last-child { border-bottom: none; }
-      .recipe-row:hover { background: var(--secondary-background-color); }
+      .recipe-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      .recipe-card:hover .recipe-name {
+        color: var(--primary-color);
+      }
+
       .recipe-thumb {
-        width: 56px; height: 56px; border-radius: 8px; object-fit: cover;
-        flex-shrink: 0; background: var(--secondary-background-color);
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        object-fit: cover;
+        display: block;
+        background: var(--secondary-background-color);
+        flex-shrink: 0;
       }
-      .recipe-thumb-placeholder { background: var(--divider-color); }
-      .recipe-row-text { min-width: 0; }
+      .recipe-thumb-placeholder {
+        background: var(--divider-color);
+      }
+
+      .recipe-card-text {
+        padding: 10px 12px 12px;
+        min-width: 0;
+      }
       .recipe-name {
-        font-weight: 500; color: var(--primary-text-color);
-        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        font-weight: 500;
+        color: var(--primary-text-color);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin-bottom: 4px;
       }
       .recipe-meta {
-        display: flex; gap: 12px; font-size: 0.85em;
-        color: var(--secondary-text-color); white-space: nowrap;
+        display: flex;
+        gap: 12px;
+        font-size: 0.85em;
+        color: var(--secondary-text-color);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     `;
   }
