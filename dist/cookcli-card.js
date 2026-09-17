@@ -172,7 +172,7 @@ class CookCliCard extends HTMLElement {
          puis 2 / 3 / 4 colonnes selon la largeur disponible. */
       .recipe-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
         gap: 12px;
       }
 
