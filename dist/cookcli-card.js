@@ -42,6 +42,7 @@ class CookCliCard extends HTMLElement {
     this._recipes = null;
     this._loading = false;
     this._error = null;
+    this._lastFetch = 0;
 
     if (!this.shadowRoot) {
       this.attachShadow({ mode: "open" });
@@ -71,6 +72,21 @@ class CookCliCard extends HTMLElement {
     }
   }
 
+  /**
+   * Vérifie si les signatures d'images risquent d'avoir expiré.
+   * Si le dernier chargement date de plus de 45 minutes, on relance une requête propre.
+   */
+  _checkAndRefresh() {
+    if (this._loading || !this._recipes) return;
+    
+    const now = Date.now();
+    const fortyFiveMinutes = 45 * 60 * 1000;
+    
+    if (now - this._lastFetch > fortyFiveMinutes) {
+      this._fetchRecipes();
+    }
+  }
+
   getCardSize() {
     return 6;
   }
@@ -84,6 +100,7 @@ class CookCliCard extends HTMLElement {
       if (this._config.entry_id) msg.entry_id = this._config.entry_id;
       const result = await this._hass.connection.sendMessagePromise(msg);
       this._recipes = result.recipes || [];
+      this._lastFetch = Date.now();
     } catch (err) {
       this._error = (err && err.message) || "Erreur inconnue";
     } finally {
@@ -119,10 +136,10 @@ class CookCliCard extends HTMLElement {
   }
 
   _renderList() {
-    if (this._loading) {
+    if (this._loading && !this._recipes) {
       return `<div class="state-msg">Chargement…</div>`;
     }
-    if (this._error) {
+    if (this._error && !this._recipes) {
       return `<div class="state-msg error">${this._escape(this._error)}</div>`;
     }
     if (!this._recipes || this._recipes.length === 0) {
